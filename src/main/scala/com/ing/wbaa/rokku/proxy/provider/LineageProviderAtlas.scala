@@ -29,7 +29,9 @@ trait LineageProviderAtlas extends LineageHelpers {
 
     val extractObjectFromPath = bucketObject.getOrElse("").split("/").takeRight(1).mkString
 
-    if (lineageHeaders.bucket.length > 1) {
+    val whitelistUserAgents = system.settings.config.getString("rokku.atlas.whitelistUserAgentSplitByComma").trim.split(",")
+
+    if (lineageHeaders.bucket.length > 1 && whitelistUserAgents.contains(lineageHeaders.clientType.getOrElse(""))) {
       lineageHeaders.method match {
         // mb bucket
         case HttpMethods.PUT if !lineageHeaders.bucket.isEmpty && pseudoDir.isEmpty && bucketObject.isEmpty =>
