@@ -42,10 +42,10 @@ class AuditLogProviderItTest extends AnyWordSpecLike with Diagrams with Embedded
         Thread.sleep(3000)
         val createEventsTopic = "audit_events"
         createCustomTopic(createEventsTopic)
-        auditLog(s3Request, HttpRequest(HttpMethods.PUT, "http://localhost", Nil), "testUser", RequestTypeUnknown(), StatusCodes.Processing)
+        auditLog(s3Request, HttpRequest(HttpMethods.PUT, "http://localhost", Nil), "testUser", RequestTypeUnknown(), StatusCodes.Processing, "test-user-agent")
         val result = consumeFirstStringMessageFrom(createEventsTopic)
         assert(result.contains("\"eventName\":\"PUT\""))
-        assert(result.contains("\"sourceIPAddress\":\"ClientIp=unknown|X-Real-IP=127.0.0.1|X-Forwarded-For=1.1.1.1|Remote-Address=2.2.2.2\""))
+        assert(result.contains("\"sourceIPAddress\":\"ClientIp=unknown|X-Real-IP=127.0.0.1|X-Forwarded-For=1.1.1.1|Remote-Address=2.2.2.2\",\"userAgent\":\"test-user-agent\""))
         assert(result.contains("\"x-amz-request-id\":\"test\""))
         assert(result.contains("\"principalId\":\"testUser\""))
       }

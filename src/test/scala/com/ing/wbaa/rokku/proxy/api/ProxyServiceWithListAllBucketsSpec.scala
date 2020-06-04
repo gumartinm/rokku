@@ -35,7 +35,7 @@ class ProxyServiceWithListAllBucketsSpec extends AnyFlatSpec with Diagrams with 
 
     override protected[this] def handlePostRequestActions(response: HttpResponse, httpRequest: HttpRequest, s3Request: S3Request, userSTS: User)(implicit id: RequestId): Unit = ()
     override protected[this] def listAllBuckets: Seq[String] = List("bucket1", "bucket2")
-    override def auditLog(s3Request: S3Request, httpRequest: HttpRequest, user: String, awsRequest: AWSRequestType, responseStatus: StatusCode)(implicit id: RequestId): Future[Done] = Future(Done)
+    override def auditLog(s3Request: S3Request, httpRequest: HttpRequest, user: String, awsRequest: AWSRequestType, responseStatus: StatusCode, requestUserAgent: String)(implicit id: RequestId): Future[Done] = Future(Done)
 
     override def awsRequestFromRequest(request: HttpRequest): AWSRequestType = RequestTypeUnknown()
 

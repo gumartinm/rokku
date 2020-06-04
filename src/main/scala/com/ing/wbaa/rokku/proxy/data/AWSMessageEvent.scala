@@ -12,7 +12,7 @@ case class Records(records: List[AWSMessageEvent])
 
 case class UserIdentity(principalId: String)
 
-case class RequestParameters(sourceIPAddress: String)
+case class RequestParameters(sourceIPAddress: String, userAgent: String)
 
 case class ResponseElements(`x-amz-request-id`: String, `x-amz-id-2`: String)
 
@@ -43,7 +43,7 @@ trait AWSMessageEventJsonSupport extends SprayJsonSupport with DefaultJsonProtoc
   implicit val objectPropsFormat = jsonFormat5(ObjectProps)
   implicit val s3Format = jsonFormat4(S3)
   implicit val userIdentityFormat = jsonFormat1(UserIdentity)
-  implicit val requestParametersFormat = jsonFormat1(RequestParameters)
+  implicit val requestParametersFormat = jsonFormat2(RequestParameters)
   implicit val responseElementsFormat = jsonFormat2(ResponseElements)
   implicit val AWSMessageEventFormat = jsonFormat9(AWSMessageEvent)
   implicit val recordsFormat = jsonFormat1(Records)
@@ -52,7 +52,7 @@ trait AWSMessageEventJsonSupport extends SprayJsonSupport with DefaultJsonProtoc
 
   def prepareAWSMessage(s3Request: S3Request, method: HttpMethod, principalId: String,
       userIPs: UserIps, s3Action: S3ObjectAction,
-      requestId: RequestId, responseStatus: StatusCode, awsRequest: AWSRequestType): Option[JsValue] = {
+      requestId: RequestId, responseStatus: StatusCode, awsRequest: AWSRequestType, requestUserAgent: String): Option[JsValue] = {
 
     val toMultipartRequest: AWSRequestType => Option[MultipartRequestType] = {
       case r: MultipartRequestType => Some(r)
@@ -75,7 +75,7 @@ trait AWSMessageEventJsonSupport extends SprayJsonSupport with DefaultJsonProtoc
       Instant.now().toString,
       multipartOrS3Action.value,
       UserIdentity(principalId),
-      RequestParameters(userIPs.toString),
+      RequestParameters(userIPs.toString, requestUserAgent),
       ResponseElements(requestId.value, responseStatus.value),
       S3("1.0", "",
         BucketProps(bucketPath, OwnerIdentity(""), ""),

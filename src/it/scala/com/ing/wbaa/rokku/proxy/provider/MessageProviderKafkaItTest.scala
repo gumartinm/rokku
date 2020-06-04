@@ -39,7 +39,7 @@ class MessageProviderKafkaItTest extends AnyWordSpecLike with Diagrams with Embe
         Thread.sleep(3000)
         val createEventsTopic = "create_events"
         createCustomTopic(createEventsTopic)
-        emitEvent(s3Request, HttpMethods.PUT, "testUser", RequestTypeUnknown())
+        emitEvent(s3Request, HttpMethods.PUT, "testUser", RequestTypeUnknown(), "test-user-agent")
         val result = consumeFirstStringMessageFrom(createEventsTopic)
         assert(result.contains("s3:ObjectCreated:PUT"))
       }
@@ -52,13 +52,13 @@ class MessageProviderKafkaItTest extends AnyWordSpecLike with Diagrams with Embe
         Thread.sleep(3000)
         val deleteEventsTopic = "delete_events"
         createCustomTopic(deleteEventsTopic)
-        emitEvent(s3Request, HttpMethods.DELETE, "testUser", RequestTypeUnknown())
+        emitEvent(s3Request, HttpMethods.DELETE, "testUser", RequestTypeUnknown(), "test-user-agent")
         assert(consumeFirstStringMessageFrom(deleteEventsTopic).contains("s3:ObjectRemoved:DELETE"))
       }
     }
 
     "fail on incomplete data" in {
-      recoverToSucceededIf[Exception](emitEvent(s3Request.copy(s3Object = None), HttpMethods.PUT, "testUser", RequestTypeUnknown()))
+      recoverToSucceededIf[Exception](emitEvent(s3Request.copy(s3Object = None), HttpMethods.PUT, "testUser", RequestTypeUnknown(), "test-user-agent"))
     }
   }
 

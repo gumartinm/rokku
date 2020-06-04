@@ -11,16 +11,16 @@ import scala.concurrent.Future
 
 trait MessageProviderKafka extends EventProducer with AWSMessageEventJsonSupport {
 
-  def emitEvent(s3Request: S3Request, method: HttpMethod, principalId: String, awsRequest: AWSRequestType)(implicit id: RequestId): Future[Done] =
+  def emitEvent(s3Request: S3Request, method: HttpMethod, principalId: String, awsRequest: AWSRequestType, requestUserAgent: String)(implicit id: RequestId): Future[Done] =
     method match {
       case HttpMethods.POST | HttpMethods.PUT =>
-        prepareAWSMessage(s3Request, method, principalId, s3Request.userIps, s3ObjectCreated(method.value), id, StatusCodes.OK, awsRequest)
+        prepareAWSMessage(s3Request, method, principalId, s3Request.userIps, s3ObjectCreated(method.value), id, StatusCodes.OK, awsRequest, requestUserAgent)
           .map(jse =>
             sendSingleMessage(jse.toString(), kafkaSettings.createEventsTopic, Some(method)))
           .getOrElse(Future(Done))
 
       case HttpMethods.DELETE =>
-        prepareAWSMessage(s3Request, method, principalId, s3Request.userIps, s3ObjectRemoved(method.value), id, StatusCodes.OK, awsRequest)
+        prepareAWSMessage(s3Request, method, principalId, s3Request.userIps, s3ObjectRemoved(method.value), id, StatusCodes.OK, awsRequest, requestUserAgent)
           .map(jse =>
             sendSingleMessage(jse.toString(), kafkaSettings.deleteEventsTopic, Some(method)))
           .getOrElse(Future(Done))

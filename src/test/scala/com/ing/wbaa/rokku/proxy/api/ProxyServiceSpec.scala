@@ -38,7 +38,7 @@ class ProxyServiceSpec extends AnyFlatSpec with Diagrams with ScalatestRouteTest
     override val requestPersistenceEnabled: Boolean = false
     override val configuredPersistenceId: String = "localhost-1"
 
-    override def auditLog(s3Request: S3Request, httpRequest: HttpRequest, user: String, awsRequest: AWSRequestType, responseStatus: StatusCode)(implicit id: RequestId): Future[Done] = Future(Done)
+    override def auditLog(s3Request: S3Request, httpRequest: HttpRequest, user: String, awsRequest: AWSRequestType, responseStatus: StatusCode, requestUserAgent: String)(implicit id: RequestId): Future[Done] = Future(Done)
 
     override def awsRequestFromRequest(request: HttpRequest): AWSRequestType = RequestTypeUnknown()
   }
