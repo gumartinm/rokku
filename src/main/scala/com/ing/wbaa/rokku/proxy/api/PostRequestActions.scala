@@ -8,6 +8,7 @@ import com.ing.wbaa.rokku.proxy.handler.parsers.RequestParser.AWSRequestType
 import com.ing.wbaa.rokku.proxy.metrics.MetricsFactory
 import com.ing.wbaa.rokku.proxy.util.S3Utils
 import com.typesafe.config.ConfigFactory
+import com.ing.wbaa.rokku.proxy.util.HttpUtils.extractUserAgent
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.Failure
@@ -24,7 +25,7 @@ trait PostRequestActions {
 
   protected[this] def createLineageFromRequest(httpRequest: HttpRequest, userSTS: User, userIPs: UserIps)(implicit id: RequestId): Future[Done]
 
-  protected[this] def emitEvent(s3Request: S3Request, method: HttpMethod, principalId: String, awsRequest: AWSRequestType)(implicit id: RequestId): Future[Done]
+  protected[this] def emitEvent(s3Request: S3Request, method: HttpMethod, principalId: String, awsRequest: AWSRequestType, requestUserAgent: String)(implicit id: RequestId): Future[Done]
 
   protected[this] def setDefaultBucketAclAndPolicy(bucketName: String)(implicit id: RequestId): Future[Unit]
 
@@ -44,7 +45,7 @@ trait PostRequestActions {
     httpRequest.method match {
       case HttpMethods.POST | HttpMethods.PUT | HttpMethods.DELETE if bucketNotificationEnabled && (response.status == StatusCodes.OK || response.status == StatusCodes.NoContent) =>
         MetricsFactory.incrementObjectsUploaded(httpRequest.method)
-        emitEvent(s3Request, httpRequest.method, userSTS.userName.value, awsRequestFromRequest(httpRequest))
+        emitEvent(s3Request, httpRequest.method, userSTS.userName.value, awsRequestFromRequest(httpRequest), requestUserAgent = extractUserAgent(httpRequest))
       case _ => Future.successful(Done)
     }
 

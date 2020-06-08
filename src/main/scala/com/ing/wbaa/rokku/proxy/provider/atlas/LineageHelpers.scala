@@ -14,6 +14,7 @@ import spray.json.JsObject
 
 import scala.concurrent.Future
 import scala.util.{ Failure, Success, Try }
+import com.ing.wbaa.rokku.proxy.util.HttpUtils._
 
 trait LineageHelpers extends EventProducer {
 
@@ -21,19 +22,8 @@ trait LineageHelpers extends EventProducer {
 
   private def timestamp: Long = System.currentTimeMillis()
 
-  private def extractClient(userAgent: String): Option[String] =
-    """(\S+)/\S+""".r
-      .findFirstMatchIn(userAgent)
-      .map(_ group 1)
-
   val CLASSIFICATIONS_HEADER = "rokku-classifications"
   val METADATA_HEADER = "rokku-metadata"
-
-  private def extractHeaderOption(httpRequest: HttpRequest, header: String): Option[String] =
-    if (httpRequest.getHeader(header).isPresent)
-      Some(httpRequest.getHeader(header).get().value())
-    else
-      None
 
   def extractMetadataHeader(metadata: Option[String])(implicit id: RequestId): Option[Map[String, String]] = {
     if (metadata.isDefined) {
